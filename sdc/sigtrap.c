@@ -7,14 +7,10 @@
  * SIGINT and SIGTERM. s_signal_handler writes to the pipe when it intercepts
  * either signal.
  *
- * main retrieves fd for the read end of the self-pipe via get_selfpipe_fd.
- * Then, zmq_poll polls a zmq_pollitem defined for it (.fd = selfpipe_read_fd,
- * .event = ZMQ_POLLIN). When s_signal_handler writes S_NOTIFY_MSG to the pipe,
- * expression (zmq_pollitem.revents & ZMQ_POLLIN) evaluates to a truthy value.
+ * main could retrieve fd for the read end of the self-pipe via get_selfpipe_fd.
  *
  * More info:
  * https://zguide.zeromq.org/docs/chapter2/#Handling-Interrupt-Signals
- * http://api.zeromq.org/master:zmq-poll
  */
 #include "sigtrap.h"
 #define S_NOTIFY_MSG " "
@@ -70,6 +66,5 @@ void s_setup() {
 int get_selfpipe_fd(int index) {
   if (index < 0 || index > 1 || !g_is_setup)
     exit(EXIT_FAILURE);
-  printf("%d %d\n", index, g_selfpipe_fds[index]);
   return g_selfpipe_fds[index];
 }

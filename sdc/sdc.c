@@ -97,7 +97,6 @@ int main(int argc, char **argv) {
   while (true) {
     // zmq_poll is also an option, but unnecessary here.
     int rc = poll(fds, 1, -1);
-    printf("%d\n", rc);
     read(selfpipe_read_fd, trash_buf, 1);
     /* "On success, poll returns a non-negative value [...] zero
      * indicates that the system call timed out [...]" (see `man poll`)
@@ -108,7 +107,6 @@ int main(int argc, char **argv) {
   printf("Exiting gracefully...");
   RIP = true;
   pthread_join(req_thr, NULL);
-  printf("out of pthread!\n");
   zmq_ctx_term(context);
   return EXIT_SUCCESS;
 }

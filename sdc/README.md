@@ -7,7 +7,7 @@ Spike Detector Calibrator (sdc) receives data from Open Ephys GUI's (OEG) zmq-in
 - sdc only runs on Linux because pthreads are in use.
 - The dependencies as of now are *zeromq* and *gsl*.
 - Hearbeating is implemented.
-- My plan for data processing is using the running statistics library from *gsl* to update mean and standard deviation estimates on the fly, because running stats uses a one-pass algorithm. With these values we can calculate the absolute deviation for each incoming voltage and pool the array for calculating Median Absolute Deviation.
+- My plan for data processing is using the running statistics library from *gsl* to update mean and standard deviation estimates on the fly, because running stats uses a one-pass algorithm. With these values we can calculate the absolute deviation for each incoming voltage and grow the array for calculating Median Absolute Deviation.
 - Adjustments are to be sent via HTTP.
 
 More on what exactly sdc is supposed to do: [notes](https://cowsay.rip/pong/notes.md).
