@@ -1,1 +1,5 @@
 sdc/sauce
+
+# compiled object files
+*.o
+*.obj
