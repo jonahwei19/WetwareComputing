@@ -6,18 +6,16 @@ void Dlp::start() {
 }
 
 void Dlp::renderLoop() {
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
-
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
+            mea_pattern->generate();
 
             window.clear(sf::Color::Black);
-            window.draw(shape);
+            window.draw(*mea_pattern);
             window.display();
         }
     }
