@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -Wall -Wextra -std=c++17 # Adjust the flags as needed
+CXXFLAGS := -Wall -Wextra -std=c++17 -pthread # Adjust the flags as needed
 SRC_DIR := .
 BUILD_DIR := ./build
 
@@ -14,7 +14,7 @@ EXECUTABLE := $(BUILD_DIR)/dlp_controller
 
 # Rule to build executable
 $(EXECUTABLE): $(OBJ_FILES)
-	$(CXX) $^ -o $@ -lsfml-graphics -lsfml-window -lsfml-system
+	$(CXX) $^ -o $@ -lsfml-graphics -lsfml-window -lsfml-system -pthread
 
 # Rule to build object files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
