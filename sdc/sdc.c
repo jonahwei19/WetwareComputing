@@ -27,7 +27,7 @@ void requester_loop(socket_thread_data *socket_data) {
   int rc;
   int linger_millisecond = 2000;
   bool isverbose = socket_data->flags->isverbose;
-  char buf[BUFFER_SIZE];
+  char buf[SMALL_BUFFER_SIZE];
 
   // Generate uuid
   uuid_t binuuid;
@@ -58,9 +58,61 @@ void requester_loop(socket_thread_data *socket_data) {
     }
     zmq_send(requester, strdup(str_heartbeat), strlen(str_heartbeat), 0);
     sleep(2);
-    rc = zmq_recv(requester, buf, BUFFER_SIZE, ZMQ_DONTWAIT);
+    rc = recv_string(requester, buf, SMALL_BUFFER_SIZE, ZMQ_DONTWAIT);
     if (isverbose && rc != -1)
       printf("%s\n", buf);
+  }
+}
+
+void subscriber_loop(socket_thread_data *socket_data) {
+  bool rcvmore;
+  size_t rcvmore_size = sizeof(rcvmore);
+  int rc;
+  char filter[] = "DATA";
+  char msg_envelope_buf[MSG_ENVELOPE_BUFFER_SIZE];
+  char msg_header_buf[MSG_HEADER_BUFFER_SIZE];
+  float msg_data_buf[MSG_DATA_BUFFER_SIZE];
+  char *buf_p;
+
+  void *subscriber = zmq_socket(socket_data->context, ZMQ_SUB);
+  zmq_setsockopt(subscriber, ZMQ_SUBSCRIBE, &filter, sizeof(filter));
+  zmq_connect(subscriber, socket_data->addr);
+
+  int n = 0;
+  while (true) {
+    if (RIP) {
+      zmq_close(subscriber);
+      printf("Subscriber thread closed.\n");
+      return;
+    }
+    switch (n) {
+    case 0:
+      rc = recv_string(subscriber, msg_envelope_buf, MSG_ENVELOPE_BUFFER_SIZE,
+                       ZMQ_DONTWAIT);
+      buf_p = msg_envelope_buf;
+      break;
+    case 1:
+      rc = recv_string(subscriber, msg_header_buf, MSG_HEADER_BUFFER_SIZE,
+                       ZMQ_DONTWAIT);
+      buf_p = msg_header_buf;
+      break;
+    case 2:
+      rc = zmq_recv(subscriber, msg_data_buf, MSG_DATA_BUFFER_SIZE,
+                    ZMQ_DONTWAIT);
+      if (rc != -1) {
+        if (rc > MSG_DATA_BUFFER_SIZE)
+          rc = MSG_DATA_BUFFER_SIZE;
+        printf("+++\n");
+        for (int i = 0; i < rc; i++)
+          printf("%f|", msg_data_buf[i]);
+        printf("\n+++\n");
+      }
+      n = 0;
+      continue;
+    }
+    if (rc != -1)
+      printf("---\n%s\n---\n", buf_p);
+    n++;
   }
 }
 
@@ -85,8 +137,10 @@ int main(int argc, char **argv) {
   pthread_t req_thr, sub_thr;
   socket_thread_data req_thread_data = {
       .flags = &flags, .context = context, .addr = req_addr};
-  socket_thread_data sub_thread_data;
+  socket_thread_data sub_thread_data = {
+      .flags = &flags, .context = context, .addr = sub_addr};
   pthread_create(&req_thr, NULL, requester_loop, &req_thread_data);
+  pthread_create(&sub_thr, NULL, subscriber_loop, &sub_thread_data);
 
   s_setup();
   int selfpipe_read_fd = get_selfpipe_fd(0);
@@ -104,9 +158,10 @@ int main(int argc, char **argv) {
     if (rc > 0)
       break;
   }
-  printf("Exiting gracefully...");
+  printf("Exiting gracefully...\n");
   RIP = true;
   pthread_join(req_thr, NULL);
+  pthread_join(sub_thr, NULL);
   zmq_ctx_term(context);
   return EXIT_SUCCESS;
 }

@@ -8,8 +8,12 @@
 #include <unistd.h>
 #include <uuid/uuid.h>
 #include <zmq.h>
-#define ADDR_MAX_LEN 30
-#define BUFFER_SIZE 500
+#define ADDR_MAX_LEN 32
+#define SMALL_BUFFER_SIZE 512
+#define LARGE_BUFFER_SIZE 4096
+#define MSG_ENVELOPE_BUFFER_SIZE 8
+#define MSG_HEADER_BUFFER_SIZE 512
+#define MSG_DATA_BUFFER_SIZE 4096
 
 typedef struct {
   int port;
@@ -25,3 +29,4 @@ typedef struct {
 void parse_args(sdc_flags *, int, char *const[]);
 
 void requester_loop(socket_thread_data *);
+void subscriber_loop(socket_thread_data *);
