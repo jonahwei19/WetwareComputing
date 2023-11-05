@@ -1,2 +1,8 @@
 sdc/sauce
 sdc/capture
+
+# compiled object files
+*.o
+*.obj
+
+dlp/build
