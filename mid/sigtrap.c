@@ -12,6 +12,14 @@
  * More info:
  * https://zguide.zeromq.org/docs/chapter2/#Handling-Interrupt-Signals
  */
+#include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include "sigtrap.h"
 #define S_NOTIFY_MSG " "
 #define S_ERROR_MSG "Error while writing to self-pipe.\n"
