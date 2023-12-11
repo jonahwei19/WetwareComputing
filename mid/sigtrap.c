@@ -12,6 +12,7 @@
  * More info:
  * https://zguide.zeromq.org/docs/chapter2/#Handling-Interrupt-Signals
  */
+#include "sigtrap.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -20,17 +21,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "sigtrap.h"
-#define S_NOTIFY_MSG " "
-#define S_ERROR_MSG "Error while writing to self-pipe.\n"
-
 static int g_selfpipe_fds[2];
 static bool g_is_setup = false;
 
 static void s_signal_handler(int signal_value) {
-  int rc = write(g_selfpipe_fds[1], S_NOTIFY_MSG, sizeof(S_NOTIFY_MSG));
-  if (rc != sizeof(S_NOTIFY_MSG)) {
-    write(STDOUT_FILENO, S_ERROR_MSG, sizeof(S_ERROR_MSG) - 1);
+  int rc = write(g_selfpipe_fds[1], S_NOTIFY_MSG, S_NOTIFY_MSG_SIZE);
+  if (rc != S_NOTIFY_MSG_SIZE) {
+    write(STDOUT_FILENO, S_ERROR_MSG, S_ERROR_MSG_SIZE);
     exit(EXIT_FAILURE);
   }
 }

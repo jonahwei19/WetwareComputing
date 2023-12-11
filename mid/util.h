@@ -1,16 +1,16 @@
 #include <stdlib.h>
+#define ERROR -1
+#define MSG_TYPE_SIZE 32
+#define ELECTRODE_NAME_SIZE 32
 
 typedef struct {
   // level 1
-  size_t data_size;
+  char msg_type[MSG_TYPE_SIZE];
   double timestamp;
-  // level 2 under "content"
-  int channel_num;
-  int num_samples;
-} header_metadata;
-
-int compare_float(const void *, const void *);
+  // level 2 under "spike"
+  char electrode_name[ELECTRODE_NAME_SIZE];
+} msg_header_t;
 
 int recv_string(void *, char *, size_t, int);
 
-void parse_msg_header(char *, header_metadata *);
+int parse_msg_header_buf(char *, msg_header_t *);
