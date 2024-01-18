@@ -6,7 +6,7 @@
 #include <string>
 #include <thread>
 
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 #include <uuid/uuid.h>
 #include <zmq.hpp>
 
@@ -19,11 +19,9 @@ std::string GenerateUuid() {
 }
 
 std::string GenerateHeartbeat(const std::string uuid) {
-  Json::Value object(Json::objectValue);
-  object["application"] = "mid";
-  object["type"] = "heartbeat";
-  object["uuid"] = uuid;
-  return object.toStyledString();
+  using nlohmann::json;
+  json object = {{"application", "mid"}, {"type", "heartbeat"}, {"uuid", uuid}};
+  return object.dump();
 }
 
 void RequestLoop(const std::string addr, zmq::context_t &ctx,
