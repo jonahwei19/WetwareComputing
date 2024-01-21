@@ -1,6 +1,7 @@
 #include "req.hpp"
 #include "signal_handler.hpp"
 #include "sub.hpp"
+#include "utils.hpp"
 
 #include <iostream>
 #include <string>
@@ -27,9 +28,13 @@ int main(int argc, char **argv) {
             << "\nsub addr: " << kSubAddr << std::endl;
   zmq::context_t ctx;
   std::thread req_thread(RequestLoop, kReqAddr, std::ref(ctx), is_verbose);
+  LogText("Created RequestLoop thread");
   std::thread sub_thread(SubscribeLoop, kSubAddr, std::ref(ctx), is_verbose);
+  LogText("Created SubscribeLoop thread");
   req_thread.join();
+  LogText("Exited RequestLoop thread");
   sub_thread.join();
-  std::cout << "Graceful Exit" << std::endl;
+  LogText("Exited SubscribeLoop thread");
+  LogText("Graceful Exit");
   return 0;
 }
