@@ -4,6 +4,7 @@
 #include <array>
 #include <mutex>
 #include <SFML/Graphics.hpp>
+#include <algorithm>
 
 constexpr std::size_t mea_cols = 12;
 constexpr std::size_t mea_rows = 10;
@@ -16,6 +17,7 @@ public:
     }
 
     void setRegionStimulation(size_t x, size_t y, bool stimulate);
+    void setGlobalStimulation(bool stimulate);
     void clearRegionStimulation();
     void generate();
 

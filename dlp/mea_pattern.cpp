@@ -4,10 +4,12 @@ void MeaPattern::setRegionStimulation(size_t x, size_t y, bool stimulate) {
     regions_to_stimulate[y][x] = stimulate;
 }
 
+void MeaPattern::setGlobalStimulation(bool stimulate) {
+    std::for_each(regions_to_stimulate.begin(), regions_to_stimulate.end(), [stimulate](auto& row) { row.fill(stimulate); });
+}
+
 void MeaPattern::clearRegionStimulation() {
-    for (auto& row : regions_to_stimulate) {
-        row.fill(false);
-    }
+    setGlobalStimulation(false);
 }
 
 void MeaPattern::generate() {
