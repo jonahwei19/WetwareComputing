@@ -1,5 +1,6 @@
 #include "req.hpp"
 #include "signal_handler.hpp"
+#include "utils.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -44,7 +45,7 @@ void RequestLoop(const std::string addr, zmq::context_t &ctx,
       std::this_thread::sleep_for(std::chrono::seconds(2));
     }
   } catch (std::exception &e) {
-    std::cout << "Heartbeat failure encountered: " << e.what() << std::endl;
+    LogText(std::format("Heartbeat failure encountered: {}", e.what()));
     RIP = 1;
     return;
   }

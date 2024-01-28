@@ -1,17 +1,21 @@
 #include "sub.hpp"
+#include "electrode.hpp"
 #include "signal_handler.hpp"
 #include "utils.hpp"
 
+#include <array>
+#include <format>
 #include <iostream>
+#include <map>
 #include <string>
-#include <vector>
 
 #include <nlohmann/json.hpp>
 #include <zmq.hpp>
 #include <zmq_addon.hpp>
 
 void SubscribeLoop(const std::string addr, zmq::context_t &ctx,
-                   const bool is_verbose) {
+                   const bool is_verbose,
+                   const TriggerConditions trigger_conditions) {
   /* message has 3 parts: envelope ("EVENT" or "DATA"), header (json containing
    * metadata), body (binary)
    */
@@ -22,30 +26,37 @@ void SubscribeLoop(const std::string addr, zmq::context_t &ctx,
   sock.set(zmq::sockopt::subscribe, kFilterString);
   sock.set(zmq::sockopt::rcvtimeo, 2000);
   sock.connect(addr);
+  int frequency_score = 0;
   json msg_header;
   std::array<zmq::message_t, kNumMessages> msg_parts;
+  ElectrodeMap electrode_map;
   try {
     while (!RIP) {
       auto it = msg_parts.begin();
       auto recv_result = zmq::recv_multipart_n(sock, it, kNumMessages);
-      // TODO: report empty recv_result under verbose
-      if (recv_result) {
-        msg_header = json::parse(msg_parts[1].to_string());
-        std::cout << msg_header["spike"].dump() << std::endl;
-        /* Tentative method for detecting a motor command:
-         * Every time a spike is received, a time difference value is calculated
-         * by subtracting its timestamp from that of its immediate predecessor.
-         * This value is compared against a set threshold. If it exceeds the
-         * threshold, a cumulative score is incremented. Once this score reach a
-         * set level, there is a motor command. If the time difference falls
-         * below the threshold, the score collapses to zero.
-         */
-      } else {
-        LogText("TIMEOUT");
+      if (!recv_result) {
+        if (is_verbose) {
+          LogText("TIMEOUT");
+        }
+        continue;
       }
+      msg_header = json::parse(msg_parts[1].to_string());
+      if (msg_header["type"] != "spike") {
+        if (is_verbose) {
+          LogText("NOT A SPIKE");
+        }
+        continue;
+      }
+      Spike new_spike = {msg_header["timestamp"],
+                         msg_header["spike"]["electrode"]};
+      if (!electrode_map.contains(new_spike.electrode_name)) {
+        electrode_map.emplace(new_spike.electrode_name,
+                              Electrode(new_spike, trigger_conditions));
+      }
+      electrode_map[new_spike.electrode_name].UpdateFrequencyScore(new_spike);
     }
   } catch (std::exception &e) {
-    std::cout << "Exception while receiving data: " << e.what() << std::endl;
+    LogText(std::format("Exception while receiving data: {}", e.what()));
     RIP = 1;
     return;
   }
