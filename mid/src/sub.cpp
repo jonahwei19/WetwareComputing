@@ -1,7 +1,7 @@
 #include "sub.hpp"
 #include "electrode.hpp"
 #include "signal_handler.hpp"
-#include "utils.hpp"
+#include "time_utils.hpp"
 
 #include <array>
 #include <format>
@@ -22,14 +22,14 @@ void SubscribeLoop(const std::string addr, zmq::context_t &ctx,
   using nlohmann::json;
   constexpr auto kNumMessages = 3;
   constexpr auto kFilterString{"EVENT"};
+  int frequency_score = 0;
+  json msg_header;
+  std::array<zmq::message_t, kNumMessages> msg_parts;
+  std::map<std::string, Electrode> electrode_map;
   zmq::socket_t sock(ctx, zmq::socket_type::sub);
   sock.set(zmq::sockopt::subscribe, kFilterString);
   sock.set(zmq::sockopt::rcvtimeo, 2000);
   sock.connect(addr);
-  int frequency_score = 0;
-  json msg_header;
-  std::array<zmq::message_t, kNumMessages> msg_parts;
-  ElectrodeMap electrode_map;
   try {
     while (!RIP) {
       auto it = msg_parts.begin();
@@ -53,7 +53,8 @@ void SubscribeLoop(const std::string addr, zmq::context_t &ctx,
         electrode_map.emplace(new_spike.electrode_name,
                               Electrode(new_spike, trigger_conditions));
       }
-      electrode_map[new_spike.electrode_name].UpdateFrequencyScore(new_spike);
+      electrode_map.at(new_spike.electrode_name)
+          .UpdateFrequencyScore(new_spike);
     }
   } catch (std::exception &e) {
     LogText(std::format("Exception while receiving data: {}", e.what()));

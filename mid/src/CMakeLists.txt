@@ -11,7 +11,7 @@ pkg_check_modules(ZEROMQ REQUIRED libzmq)
 pkg_check_modules(UUID REQUIRED uuid)
 
 add_executable(mid)
-target_sources(mid PRIVATE main.cpp PRIVATE signal_handler.cpp PRIVATE utils.cpp PRIVATE req.cpp PRIVATE sub.cpp)
+target_sources(mid PRIVATE main.cpp PRIVATE signal_handler.cpp PRIVATE time_utils.cpp PRIVATE req.cpp PRIVATE sub.cpp)
 
 target_link_libraries(mid nlohmann_json::nlohmann_json)
 target_link_libraries(mid ${ZEROMQ_LIBRARIES})
