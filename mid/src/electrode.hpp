@@ -3,8 +3,6 @@
 
 #include "time_utils.hpp"
 
-#include <format>
-#include <map>
 #include <string>
 
 typedef struct Spike {
@@ -31,19 +29,6 @@ public:
         trigger_conditions{trigger_conditions} {
     frequency_score = 0;
   }
-  void UpdateFrequencyScore(const Spike new_spike) {
-    JuceTime gap_between_spikes = new_spike.timestamp - last_spike.timestamp;
-    if (gap_between_spikes < trigger_conditions.maximum_interval) {
-      ++frequency_score;
-    } else {
-      frequency_score = 0;
-    }
-    if (frequency_score == trigger_conditions.number_of_spikes) {
-      LogText(std::format("{}: trigger", name));
-      frequency_score = 0;
-    }
-    last_spike = new_spike;
-  }
+  void UpdateFrequencyScore(const Spike new_spike);
 };
-
 #endif
