@@ -5,4 +5,6 @@
 dlp/build
 
 # mid
-mid/build
+mid/build/
+mid/.cache/
+compile_commands.json
