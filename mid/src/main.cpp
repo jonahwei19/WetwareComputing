@@ -38,14 +38,15 @@ int main(int argc, char **argv) {
             << "\nsub addr: " << kSubAddr << std::endl;
   TriggerConditions trigger_conditions{maximum_interval, number_of_spikes};
   zmq::context_t ctx;
-  std::thread req_thread(RequestLoop, kReqAddr, std::ref(ctx), is_verbose);
+  std::thread requester_thread(RequestLoop, kReqAddr, std::ref(ctx),
+                               is_verbose);
   LogText("Created RequestLoop thread");
-  std::thread sub_thread(SubscribeLoop, kSubAddr, std::ref(ctx), is_verbose,
-                         trigger_conditions);
+  std::thread subscriber_thread(SubscribeLoop, kSubAddr, std::ref(ctx),
+                                is_verbose, trigger_conditions);
   LogText("Created SubscribeLoop thread");
-  req_thread.join();
+  requester_thread.join();
   LogText("Exited RequestLoop thread");
-  sub_thread.join();
+  subscriber_thread.join();
   LogText("Exited SubscribeLoop thread");
   LogText("Graceful Exit");
   return 0;

@@ -1,6 +1,8 @@
 #include "electrode.hpp"
+#include "time_utils.hpp"
 
 #include <format>
+#include <iostream>
 
 void Electrode::UpdateFrequencyScore(const Spike new_spike) {
   auto time_gap_between_spikes = new_spike.timestamp - last_spike.timestamp;
@@ -14,4 +16,7 @@ void Electrode::UpdateFrequencyScore(const Spike new_spike) {
     frequency_score = 0;
   }
   last_spike = new_spike;
+  std::cout << std::format("Delay: {}",
+                           CurrentTimeMillis() - last_spike.timestamp)
+            << std::endl;
 }

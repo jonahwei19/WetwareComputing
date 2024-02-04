@@ -13,5 +13,5 @@ JuceTime CurrentTimeMillis() {
 }
 
 void LogText(const std::string &text) {
-  std::cout << "[" << CurrentTimeMillis() << "] " << text << std::endl;
+  std::cout << "[" << CurrentTimeMillis() << "] " << text << "\n";
 }
